@@ -1,0 +1,87 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "id": "telegram-trigger-node",
+      "name": "Telegram Trigger",
+      "credentials": {
+        "telegramApi": {
+          "name": "YOUR_TELEGRAM_BOT_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_MODAL_ENDPOINT_URL_HERE",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_PIPELINE_AUTH_TOKEN"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [208, 0],
+      "id": "http-request-node",
+      "name": "Lead Processor"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=Lead pipeline done!\n\nRaw leads: {{ $json.raw_leads }}\nAfter dedup: {{ $json.fresh_after_dedup }}\nEmail verified: {{ $json.verified_emails }}\nAdded to sheet: {{ $json.added_to_main }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [416, 0],
+      "id": "telegram-send-node",
+      "name": "Send a text message",
+      "credentials": {
+        "telegramApi": {
+          "name": "YOUR_TELEGRAM_BOT_CREDENTIAL"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Lead Processor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead Processor": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
